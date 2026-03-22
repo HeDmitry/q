@@ -35,7 +35,10 @@ def main(page: ft.Page):
     page.title = "Encoder"
     page.theme_mode = ft.ThemeMode.DARK
     page.padding = 20
-    page.scroll = ft.ScrollMode.AUTO # Добавлена прокрутка для мобилок
+    page.scroll = ft.ScrollMode.AUTO 
+    
+    # === ЦЕНТРИРУЕМ СОДЕРЖИМОЕ ПО ВЕРТИКАЛИ ===
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER 
     
     page.window.width = 450
     page.window.height = 750
@@ -49,7 +52,6 @@ def main(page: ft.Page):
     )
 
     def show_toast(message, color=ft.Colors.GREEN_600):
-        # В новых версиях Flet всплывающие уведомления добавляются через overlay
         snack = ft.SnackBar(ft.Text(message, size=16), bgcolor=color, duration=2000)
         page.overlay.append(snack)
         snack.open = True
@@ -90,7 +92,7 @@ def main(page: ft.Page):
             return
 
         if len(ciphertext) < 12:
-            show_toast("Ошибка: Здесь нет зашифрованного сообщения!", ft.Colors.ERROR)
+            show_toast("Ошибка: Текст не зашифрован!", ft.Colors.ERROR)
             return
 
         text_len = len(ciphertext) - 12
@@ -131,17 +133,17 @@ def main(page: ft.Page):
         output_field.value = decrypted_result
         page.update()
 
-    # --- Функции для новых кнопок ---
-    def copy_result(e):
+    # --- Функции копирования сделаны асинхронными (async / await) ---
+    async def copy_result(e):
         if output_field.value:
-            # Новый API для буфера обмена
-            page.clipboard.set(output_field.value)
+            # Вызов нового API для буфера обмена с ожиданием await
+            await ft.Clipboard().set(output_field.value)
             show_toast("Результат скопирован в буфер!")
 
-    def copy_input(e):
+    async def copy_input(e):
         if input_field.value:
-            # Новый API для буфера обмена
-            page.clipboard.set(input_field.value)
+            # Вызов нового API для буфера обмена с ожиданием await
+            await ft.Clipboard().set(input_field.value)
             show_toast("Исходный текст скопирован!")
 
     def clear_all(e):
@@ -158,7 +160,7 @@ def main(page: ft.Page):
         min_lines=5, 
         max_lines=7, 
         text_size=16,
-        hint_text="Введите текст для шифрования или дешифровки...",
+        hint_text="...",
         border_radius=12,
         border_color=ft.Colors.TRANSPARENT,
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
@@ -170,15 +172,15 @@ def main(page: ft.Page):
         min_lines=5, 
         max_lines=7, 
         text_size=16,
-        hint_text="Здесь появится результат...",
+        hint_text="...",
         border_radius=12,
         border_color=ft.Colors.TRANSPARENT,
         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
         content_padding=15,
-        read_only=True # Запрещаем редактировать вывод
+        read_only=True
     )
     
-    # Кнопки действия (заменены устаревшие ElevatedButton на современные Button)
+    # Кнопки действия
     btn_encrypt = ft.Button(
         "Зашифровать", 
         on_click=encrypt, 
@@ -217,7 +219,7 @@ def main(page: ft.Page):
         ),
         input_field,
         
-        # Центрированный блок с главными кнопками (исправлен margin)
+        # Центрированный блок с главными кнопками
         ft.Container(
             content=ft.Row([btn_encrypt, btn_decrypt], alignment=ft.MainAxisAlignment.CENTER, spacing=15),
             margin=ft.Margin.symmetric(vertical=15)
